@@ -23,12 +23,19 @@ class BillFormState extends State<BillForm> {
   int _amountValue = 0;
   Category dropdownValue;
   bool isPayed = false;
+  bool isRecurrent = false;
 
   List<DropdownMenuItem<Category>> categories = List();
 
   TextEditingController nameFieldController = TextEditingController();
   TextEditingController amountFieldController = TextEditingController();
   TextEditingController dueDateFieldController = TextEditingController();
+
+  @override
+  void initState() {
+    dueDateFieldController.text = DateTime.now().day.toString();
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
@@ -49,12 +56,14 @@ class BillFormState extends State<BillForm> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           backgroundColor: BARS_COLOR,
           title: Text("Add new"),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
+              FocusScope.of(context).requestFocus(FocusNode());
               Navigator.pop(context, false);
             },
           ),
@@ -63,7 +72,7 @@ class BillFormState extends State<BillForm> {
                 icon: Icon(Icons.save, size: 30, color: Colors.white),
                 onPressed: () {
                   Bill bill = Bill(nameFieldController.text, amountFieldController.text,
-                      dropdownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN);
+                      dropdownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN, isRecurrent);
                   Navigator.pop(context, bill);
                 }
             )
@@ -117,9 +126,19 @@ class BillFormState extends State<BillForm> {
                           } )
                         ],
                       ),
-                    ),
+                    )
                   ],
-                )
+                ),
+                Row(
+                  children: <Widget>[
+                    Text("Recorrente?"),
+                    Switch(value: isRecurrent, onChanged: (value) {
+                      setState(() {
+                        isRecurrent = value;
+                      });
+                    } )
+                  ],
+                ),
               ],
             ),
           )

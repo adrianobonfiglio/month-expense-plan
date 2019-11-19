@@ -9,29 +9,30 @@ class Bill {
   Category category;
   String dueDate;
   Status status;
+  bool recurrent;
 
-  Bill(this.name, this.amount, this.category, this.dueDate, this.status);
+  Bill(this.name, this.amount, this.category, this.dueDate, this.status, this.recurrent);
 
   static List<Bill> findAll() {
     return [
       Bill("Compras do Mês", "R\$ 500,00",
-          Category("Marcado", Color(0xffFF1744)), "15", Status.OPEN),
-      Bill("Água", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "25", Status.OPEN),
-      Bill("Luz", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "10", Status.OPEN),
+          Category("Marcado", Color(0xffFF1744)), "15", Status.OPEN, false),
+      Bill("Água", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "25", Status.OPEN, false),
+      Bill("Luz", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "10", Status.OPEN, false),
       Bill("Celular", "R\$ 130,00", Category("Pessoal", Color(0xff0091EA)),
-          "15", Status.OPEN),
+          "15", Status.OPEN, false),
       Bill("Carro", "R\$ 380,00", Category("Carro", Color(0xff6200ea)),
-          "22", Status.OPEN),
+          "22", Status.OPEN, false),
       Bill("Internet", "R\$ 99,00", Category("Pessoal", Color(0xff0091EA)),
-          "15", Status.OPEN)
+          "15", Status.OPEN, false)
     ];
   }
 
   static List<Bill> findAllPayed() {
     return [
       Bill("Compras do Mês", "R\$ 500,00",
-          Category("Marcado", Color(0xffFF1744)), "15", Status.PAYED),
-      Bill("Água", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "25", Status.PAYED)
+          Category("Marcado", Color(0xffFF1744)), "15", Status.PAYED, false),
+      Bill("Água", "R\$ 90,00", Category("Casa", Color(0xff00C853)), "25", Status.PAYED, false)
     ];
   }
 }

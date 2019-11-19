@@ -25,6 +25,7 @@ class BillCard extends StatelessWidget {
       child: Container(
         height: 90,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +73,7 @@ class BillCard extends StatelessWidget {
                     height: 50,
                     alignment: Alignment.topRight,
                     padding: EdgeInsets.only(top: 10, right: 10),
-                    child: Text(this.amount, style:
+                    child: Text("R\$ ${this.amount}", style:
                       TextStyle(fontFamily: FONT_FAMILY, fontWeight:FontWeight.bold, fontSize: 18),
                     ),
                   ),

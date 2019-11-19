@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:month_expense_plan/bill/bill.dart';
 import 'package:month_expense_plan/bill/billform.dart';
 import 'package:month_expense_plan/bill/card.dart';
+import 'package:month_expense_plan/bill/status.dart';
 
 void main() => runApp(MyApp());
 
@@ -47,6 +48,7 @@ const FONT_FAMILY = "Helvetica Neue";
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   TabController controller;
+
   List<Widget> bills = new List();
   List<Widget> payedBills = new List();
 
@@ -58,11 +60,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     print("Init state");
 
     Bill.findAll().forEach((b) {
-      bills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
+      //bills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
     });
 
     Bill.findAllPayed().forEach((b) {
-      payedBills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
+      //payedBills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
     });
   }
 
@@ -73,18 +75,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  _goToFormAndWaitForSaveResult(BuildContext context) async {
+    final b = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => BillForm()));
+
+    setState(() {
+      if(b != null && b.status == Status.OPEN) {
+        controller.animateTo(0, duration: Duration(seconds: 2));
+        bills = List.from(bills)..add(BillCard(b.name, b.dueDate, b.category, b.amount));
+      }else {
+        controller.animateTo(1, duration: Duration(seconds: 2));
+        payedBills = List.from(payedBills)..add(BillCard(b.name, b.dueDate, b.category, b.amount));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    _goToFormAndWaitForSaveResult(BuildContext context) async {
-      final b = await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => BillForm()));
-
-      setState(() {
-        bills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
-      });
-    }
-
 
     return Scaffold(
       appBar: AppBar(
@@ -97,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         children: <Widget>[
           Container(
               color: BARS_COLOR,
-              height: 130,
+              height: 115,
               child: Column(
                 children: <Widget>[
                   Row(
@@ -170,10 +177,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ],
               )),
           Container(
-            height: (MediaQuery
+            height: ((MediaQuery
                 .of(context)
                 .size
-                .height - 266),
+                .height - AppBar().preferredSize.height) - 115 - 80),
             child:
             TabBarView(
               controller: controller,
