@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:month_expense_plan/bill/bill.dart';
 import 'package:month_expense_plan/bill/category.dart';
 import 'package:month_expense_plan/bill/status.dart';
-import 'package:month_expense_plan/main.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 const BARS_COLOR = Color(0xff00BFA5);
 
@@ -71,6 +71,13 @@ class BillFormState extends State<BillForm> {
             IconButton(
                 icon: Icon(Icons.save, size: 30, color: Colors.white),
                 onPressed: () {
+                  FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
+                      amount: double.parse(amountFieldController.text),
+                      settings: MoneyFormatterSettings(symbol: "R\$", decimalSeparator: ",", fractionDigits: 2)
+                  );
+
+                  print(flutterMoneyFormatter.output.symbolOnLeft);
+
                   Bill bill = Bill(nameFieldController.text, amountFieldController.text,
                       dropdownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN, isRecurrent);
                   Navigator.pop(context, bill);
@@ -89,7 +96,7 @@ class BillFormState extends State<BillForm> {
                 ),
                 TextField(
                   controller: amountFieldController,
-                  decoration: InputDecoration(labelText: "Valor", prefix: Text("R\$ ")),
+                  decoration: InputDecoration(labelText: "Valor", prefix: Text("R\$ "))
                 ),
                 TextField(
                   controller: dueDateFieldController,
