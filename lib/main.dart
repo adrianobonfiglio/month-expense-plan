@@ -82,10 +82,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     setState(() {
       if(b != null && b.status == Status.OPEN) {
         controller.animateTo(0, duration: Duration(seconds: 2));
-        bills = List.from(bills)..add(BillCard(b.name, b.dueDate, b.category, b.amount));
+        bills = List.from(bills)..add(BillCard(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
       }else {
         controller.animateTo(1, duration: Duration(seconds: 2));
-        payedBills = List.from(payedBills)..add(BillCard(b.name, b.dueDate, b.category, b.amount));
+        payedBills = List.from(payedBills)..add(BillCard(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
       }
     });
   }
@@ -185,6 +185,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             TabBarView(
               controller: controller,
                 children: <Widget>[
+                  ListView.builder(itemBuilder: null, )
                   ListView(scrollDirection: Axis.vertical, children: bills),
                   ListView(scrollDirection: Axis.vertical, children: payedBills),
             ]),

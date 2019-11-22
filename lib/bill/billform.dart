@@ -9,7 +9,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 const BARS_COLOR = Color(0xff00BFA5);
 
 class BillForm extends StatefulWidget {
-
+  
   @override
   State<StatefulWidget> createState() {
     return BillFormState();
@@ -20,8 +20,10 @@ class BillForm extends StatefulWidget {
 class BillFormState extends State<BillForm> {
 
   final _formKey = GlobalKey<FormState>();
+
+  String screenTitle = "Add new";
   int _amountValue = 0;
-  Category dropdownValue;
+  Category categoryDropDownValue;
   bool isPayed = false;
   bool isRecurrent = false;
 
@@ -55,11 +57,21 @@ class BillFormState extends State<BillForm> {
   @override
   Widget build(BuildContext context) {
 
+    Bill bill = ModalRoute.of(context).settings.arguments;
+    if(bill != null) {
+      screenTitle = "Edit Bill";
+      nameFieldController.text = bill.name;
+      amountFieldController.text = bill.amount;
+      dueDateFieldController.text = bill.dueDate;
+      isPayed = bill.status == Status.PAYED ? true : false;
+      isRecurrent = bill.recurrent;
+    }
+
     return Scaffold(
       resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           backgroundColor: BARS_COLOR,
-          title: Text("Add new"),
+          title: Text(screenTitle),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -79,7 +91,7 @@ class BillFormState extends State<BillForm> {
                   print(flutterMoneyFormatter.output.symbolOnLeft);
 
                   Bill bill = Bill(nameFieldController.text, amountFieldController.text,
-                      dropdownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN, isRecurrent);
+                      categoryDropDownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN, isRecurrent);
                   Navigator.pop(context, bill);
                 }
             )
@@ -107,7 +119,7 @@ class BillFormState extends State<BillForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     DropdownButton(
-                        value: dropdownValue,
+                        value: categoryDropDownValue,
                         hint: Text("Categoria"),
                         icon: Icon(Icons.arrow_downward),
                         iconSize: 24,
@@ -117,7 +129,7 @@ class BillFormState extends State<BillForm> {
                         ),
                         onChanged: (Category category) {
                           setState(() {
-                            dropdownValue = category;
+                            categoryDropDownValue = category;
                           });
                         },
                         items: categories
