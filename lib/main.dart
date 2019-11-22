@@ -185,7 +185,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             TabBarView(
               controller: controller,
                 children: <Widget>[
-                  ListView.builder(itemBuilder: null, )
                   ListView(scrollDirection: Axis.vertical, children: bills),
                   ListView(scrollDirection: Axis.vertical, children: payedBills),
             ]),
