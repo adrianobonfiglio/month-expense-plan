@@ -75,17 +75,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  _goToFormAndWaitForSaveResult(BuildContext context) async {
-    final b = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => BillForm()));
+
+  _buildBillCardWidget(Bill bill) {
+    return GestureDetector(
+      onTap: () {
+        _goToFormAndWaitForSaveResult(context, bill);
+      },
+      child: BillCard(bill),
+    );
+  }
+
+
+
+  _goToFormAndWaitForSaveResult(BuildContext context, Bill bill) async {
+    Bill b;
+    if(bill != null) {
+      b = await Navigator.push(context, MaterialPageRoute(builder: (context)=> BillForm(),
+          settings: RouteSettings(arguments: bill)));
+    } else {
+        b = await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => BillForm()));
+    }
 
     setState(() {
       if(b != null && b.status == Status.OPEN) {
         controller.animateTo(0, duration: Duration(seconds: 2));
-        bills = List.from(bills)..add(BillCard(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
+        bills = List.from(bills)..add(_buildBillCardWidget(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
       }else {
         controller.animateTo(1, duration: Duration(seconds: 2));
-        payedBills = List.from(payedBills)..add(BillCard(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
+        payedBills = List.from(payedBills)..add(_buildBillCardWidget(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
       }
     });
   }
@@ -185,7 +203,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             TabBarView(
               controller: controller,
                 children: <Widget>[
-                  ListView.builder(itemBuilder: null, )
                   ListView(scrollDirection: Axis.vertical, children: bills),
                   ListView(scrollDirection: Axis.vertical, children: payedBills),
             ]),
@@ -212,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Icon(Icons.add),
         backgroundColor: Color(0xffFFC400),
         onPressed: (){
-          _goToFormAndWaitForSaveResult(context);
+          _goToFormAndWaitForSaveResult(context, null);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
