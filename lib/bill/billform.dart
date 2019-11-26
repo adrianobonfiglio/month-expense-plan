@@ -65,6 +65,7 @@ class BillFormState extends State<BillForm> {
       dueDateFieldController.text = bill.dueDate;
       isPayed = bill.status == Status.PAYED ? true : false;
       isRecurrent = bill.recurrent;
+      categoryDropDownValue = categories.where((cat) => cat.value.name == bill.category.name).toList()[0].value;
     }
 
     return Scaffold(
