@@ -32,6 +32,7 @@ class BillFormState extends State<BillForm> {
   TextEditingController nameFieldController = TextEditingController();
   TextEditingController amountFieldController = TextEditingController();
   TextEditingController dueDateFieldController = TextEditingController();
+  TextEditingController plannedAmount = TextEditingController();
 
   @override
   void initState() {
@@ -41,6 +42,8 @@ class BillFormState extends State<BillForm> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
+    print("form dependencies change");
     for(Category category in Category.allCategories()) {
       categories.add(
           DropdownMenuItem<Category>(
@@ -50,26 +53,27 @@ class BillFormState extends State<BillForm> {
               )
           )
       );
+
     }
-    super.didChangeDependencies();
+    setState(() {
+      Bill bill = ModalRoute.of(context).settings.arguments;
+      if(bill != null) {
+        screenTitle = "Edit Bill";
+        nameFieldController.text = bill.name;
+        amountFieldController.text = bill.amount.toString();
+        dueDateFieldController.text = bill.dueDate;
+        isPayed = bill.status == Status.PAYED ? true : false;
+        isRecurrent = bill.recurrent;
+        categoryDropDownValue = categories.where((cat) => cat.value.name == bill.category.name).toList()[0].value;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
 
-    Bill bill = ModalRoute.of(context).settings.arguments;
-    if(bill != null) {
-      screenTitle = "Edit Bill";
-      nameFieldController.text = bill.name;
-      amountFieldController.text = bill.amount;
-      dueDateFieldController.text = bill.dueDate;
-      isPayed = bill.status == Status.PAYED ? true : false;
-      isRecurrent = bill.recurrent;
-      categoryDropDownValue = categories.where((cat) => cat.value.name == bill.category.name).toList()[0].value;
-    }
-
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: BARS_COLOR,
           title: Text(screenTitle),
@@ -89,10 +93,10 @@ class BillFormState extends State<BillForm> {
                       settings: MoneyFormatterSettings(symbol: "R\$", decimalSeparator: ",", fractionDigits: 2)
                   );
 
-                  print(flutterMoneyFormatter.output.symbolOnLeft);
 
-                  Bill bill = Bill(nameFieldController.text, amountFieldController.text,
-                      categoryDropDownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN, isRecurrent);
+                  Bill bill = Bill(nameFieldController.text, double.tryParse(amountFieldController.text),
+                      categoryDropDownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN,
+                      isRecurrent, double.tryParse(plannedAmount.text));
                   Navigator.pop(context, bill);
                 }
             )
@@ -107,9 +111,34 @@ class BillFormState extends State<BillForm> {
                   controller: nameFieldController,
                   decoration: InputDecoration(labelText: "Nome"),
                 ),
+                Container(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Row(
+                    children: <Widget>[
+                      Text("Recorrente?"),
+                      Switch(value: isRecurrent, onChanged: (value) {
+                        setState(() {
+                          isRecurrent = value;
+                        });
+                      } ),
+                      Text("Pago?"),
+                      Switch(value: isPayed, onChanged: (value) {
+                        setState(() {
+                          isPayed = value;
+                        });
+                      } )
+                    ],
+                  ),
+                ),
                 TextField(
+                    enabled: isRecurrent,
+                    controller: amountFieldController,
+                    decoration: InputDecoration(labelText: "Valor Planejado", prefix: Text("R\$ "))
+                ),
+                TextField(
+                  enabled: isPayed,
                   controller: amountFieldController,
-                  decoration: InputDecoration(labelText: "Valor", prefix: Text("R\$ "))
+                  decoration: InputDecoration(labelText: "Valor Pago", prefix: Text("R\$ "))
                 ),
                 TextField(
                   controller: dueDateFieldController,
@@ -134,29 +163,7 @@ class BillFormState extends State<BillForm> {
                           });
                         },
                         items: categories
-                    ) ,
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Text("Pago?"),
-                          Switch(value: isPayed, onChanged: (value) {
-                            setState(() {
-                              isPayed = value;
-                            });
-                          } )
-                        ],
-                      ),
                     )
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    Text("Recorrente?"),
-                    Switch(value: isRecurrent, onChanged: (value) {
-                      setState(() {
-                        isRecurrent = value;
-                      });
-                    } )
                   ],
                 ),
               ],

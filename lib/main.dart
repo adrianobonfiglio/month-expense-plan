@@ -49,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   TabController controller;
 
-  List<Widget> bills = new List();
-  List<Widget> payedBills = new List();
+  List<Bill> bills = new List();
+  List<Bill> payedBills = new List();
 
   @override
   void initState() {
@@ -75,35 +75,51 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  _gotToFormAndWaitForUpdate(BuildContext context, int index, Status status) async {
+    Bill bill;
+    if(status == Status.OPEN) {
+      bill = bills[index];
+    }else {
+      bill = payedBills[index];
+    }
+   final b = await Navigator.push(context, MaterialPageRoute(builder: (context)=> BillForm(),
+        settings: RouteSettings(arguments: bill)));
 
-  _buildBillCardWidget(Bill bill) {
-    return GestureDetector(
-      onTap: () {
-        _goToFormAndWaitForSaveResult(context, bill);
-      },
-      child: BillCard(bill),
-    );
+    setState(() {
+      if(b!= null && (bill.status == Status.OPEN && b.status != Status.OPEN)) {
+        bills.removeAt(index);
+        payedBills.insert(payedBills.length, b);
+        controller.animateTo(1, duration: Duration(seconds: 2));
+      }else if(b!= null && (bill.status == Status.PAYED && b.status != Status.PAYED)){
+        payedBills.removeAt(index);
+        bills.insert(bills.length, b);
+        controller.animateTo(0, duration: Duration(seconds: 2));
+      }else if(b != null && b.status == Status.OPEN) {
+        bills.removeAt(index);
+        bills.insert(index, b);
+        controller.animateTo(0, duration: Duration(seconds: 2));
+      }else {
+        payedBills.removeAt(index);
+        payedBills.insert(index, b);
+        controller.animateTo(1, duration: Duration(seconds: 2));
+      }
+    });
   }
 
 
-
-  _goToFormAndWaitForSaveResult(BuildContext context, Bill bill) async {
-    Bill b;
-    if(bill != null) {
-      b = await Navigator.push(context, MaterialPageRoute(builder: (context)=> BillForm(),
-          settings: RouteSettings(arguments: bill)));
-    } else {
-        b = await Navigator.push(context,
+  _goToFormAndWaitForSaveResult(BuildContext context) async {
+        final b = await Navigator.push(context,
           MaterialPageRoute(builder: (context) => BillForm()));
-    }
+        
+        print("SAVED");
 
     setState(() {
       if(b != null && b.status == Status.OPEN) {
         controller.animateTo(0, duration: Duration(seconds: 2));
-        bills = List.from(bills)..add(_buildBillCardWidget(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
+        bills = List.from(bills)..add(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent, b.amount));
       }else {
         controller.animateTo(1, duration: Duration(seconds: 2));
-        payedBills = List.from(payedBills)..add(_buildBillCardWidget(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent)));
+        payedBills = List.from(payedBills)..add(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent, b.amount));
       }
     });
   }
@@ -203,8 +219,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             TabBarView(
               controller: controller,
                 children: <Widget>[
-                  ListView(scrollDirection: Axis.vertical, children: bills),
-                  ListView(scrollDirection: Axis.vertical, children: payedBills),
+                  ListView.builder(itemCount: bills.length ,itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: (){
+                        _gotToFormAndWaitForUpdate(context, index, Status.OPEN);
+                      },
+                      child: BillCard(bills[index]),
+                    );
+                  }),
+                  ListView.builder(itemCount: payedBills.length,itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: (){
+                        _gotToFormAndWaitForUpdate(context, index, Status.PAYED);
+                      },
+                      child: BillCard(payedBills[index]),
+                    );
+                  })
             ]),
           ),
           BottomNavigationBar(
@@ -229,7 +259,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Icon(Icons.add),
         backgroundColor: Color(0xffFFC400),
         onPressed: (){
-          _goToFormAndWaitForSaveResult(context, null);
+          _goToFormAndWaitForSaveResult(context);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
