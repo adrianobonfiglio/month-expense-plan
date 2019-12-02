@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
@@ -56,77 +56,79 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     controller = new TabController(length: 2, vsync: this);
-
-    print("Init state");
-
-    Bill.findAll().forEach((b) {
-      //bills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
-    });
-
-    Bill.findAllPayed().forEach((b) {
-      //payedBills.add(BillCard(b.name, b.dueDate, b.category, b.amount));
-    });
   }
 
   @override
   void dispose() {
     controller.dispose();
-    print("closing");
     super.dispose();
   }
 
-  _gotToFormAndWaitForUpdate(BuildContext context, int index, Status status) async {
+  _gotToFormAndWaitForUpdate(BuildContext context, int index,
+      Status status) async {
     Bill bill;
-    if(status == Status.OPEN) {
+    if (status == Status.OPEN) {
       bill = bills[index];
-    }else {
+    } else {
       bill = payedBills[index];
     }
-   final b = await Navigator.push(context, MaterialPageRoute(builder: (context)=> BillForm(),
+    final b = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => BillForm(),
         settings: RouteSettings(arguments: bill)));
 
     setState(() {
-      if(b!= null && (bill.status == Status.OPEN && b.status != Status.OPEN)) {
+      if (b != null &&
+          (bill.status == Status.OPEN && b.status != Status.OPEN)) {
         bills.removeAt(index);
-        payedBills.insert(payedBills.length, b);
-        controller.animateTo(1, duration: Duration(seconds: 2));
-      }else if(b!= null && (bill.status == Status.PAYED && b.status != Status.PAYED)){
+        _addToPayedBillsAndShowTab(b, null);
+      } else if (b != null &&
+          (bill.status == Status.PAYED && b.status != Status.PAYED)) {
         payedBills.removeAt(index);
-        bills.insert(bills.length, b);
-        controller.animateTo(0, duration: Duration(seconds: 2));
-      }else if(b != null && b.status == Status.OPEN) {
+        _addToOpenBillsAndShowTab(b, null);
+      } else if (b != null && b.status == Status.OPEN) {
         bills.removeAt(index);
-        bills.insert(index, b);
-        controller.animateTo(0, duration: Duration(seconds: 2));
-      }else {
+        _addToOpenBillsAndShowTab(b, index);
+      } else {
         payedBills.removeAt(index);
-        payedBills.insert(index, b);
-        controller.animateTo(1, duration: Duration(seconds: 2));
+        _addToPayedBillsAndShowTab(b, index);
       }
     });
   }
 
+  _addToOpenBillsAndShowTab(Bill bill, int index) {
+    int i = bills.length;
+    if (index != null) {
+      i = index;
+    }
+    bills.insert(i, bill);
+    controller.animateTo(0, duration: Duration(seconds: 2));
+  }
+
+  _addToPayedBillsAndShowTab(Bill bill, int index) {
+    int i = payedBills.length;
+    if (index != null) {
+      i = index;
+    }
+    payedBills.insert(i, bill);
+    controller.animateTo(1, duration: Duration(seconds: 2));
+  }
+
 
   _goToFormAndWaitForSaveResult(BuildContext context) async {
-        final b = await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => BillForm()));
-        
-        print("SAVED");
+    final b = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => BillForm()));
 
     setState(() {
-      if(b != null && b.status == Status.OPEN) {
-        controller.animateTo(0, duration: Duration(seconds: 2));
-        bills = List.from(bills)..add(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent, b.amount));
-      }else {
-        controller.animateTo(1, duration: Duration(seconds: 2));
-        payedBills = List.from(payedBills)..add(Bill(b.name, b.amount, b.category, b.dueDate, b.status, b.recurrent, b.amount));
+      if (b != null && b.status == Status.OPEN) {
+        _addToOpenBillsAndShowTab(b, null);
+      } else {
+        _addToPayedBillsAndShowTab(b, null);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Novembro", style: TextStyle(color: Colors.white)),
@@ -183,30 +185,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ],
                   ),
                   Expanded(
-                      child: TabBar(
-                        controller: controller,
-                        onTap: (index){
-                          print(index);
-                        },
-                        indicator: UnderlineTabIndicator(
-                            insets: EdgeInsets.all(5),
-                            borderSide:
-                            BorderSide(width: 5, color: Colors.amber)),
-                        tabs: [
-                          Text("Abertas",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold)),
-                          Text("Pagas",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      ),
+                    child: TabBar(
+                      controller: controller,
+                      onTap: (index) {
+                        print(index);
+                      },
+                      indicator: UnderlineTabIndicator(
+                          insets: EdgeInsets.all(5),
+                          borderSide:
+                          BorderSide(width: 5, color: Colors.amber)),
+                      tabs: [
+                        Text("Abertas",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: FONT_FAMILY,
+                                fontWeight: FontWeight.bold)),
+                        Text("Pagas",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: FONT_FAMILY,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   )
                 ],
               )),
@@ -217,25 +219,28 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 .height - AppBar().preferredSize.height) - 115 - 80),
             child:
             TabBarView(
-              controller: controller,
+                controller: controller,
                 children: <Widget>[
-                  ListView.builder(itemCount: bills.length ,itemBuilder: (context, index) {
+                  ListView.builder(
+                      itemCount: bills.length, itemBuilder: (context, index) {
                     return GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         _gotToFormAndWaitForUpdate(context, index, Status.OPEN);
                       },
                       child: BillCard(bills[index]),
                     );
                   }),
-                  ListView.builder(itemCount: payedBills.length,itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: (){
-                        _gotToFormAndWaitForUpdate(context, index, Status.PAYED);
-                      },
-                      child: BillCard(payedBills[index]),
-                    );
-                  })
-            ]),
+                  ListView.builder(itemCount: payedBills.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            _gotToFormAndWaitForUpdate(
+                                context, index, Status.PAYED);
+                          },
+                          child: BillCard(payedBills[index]),
+                        );
+                      })
+                ]),
           ),
           BottomNavigationBar(
               backgroundColor: BARS_COLOR,
@@ -258,13 +263,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: Color(0xffFFC400),
-        onPressed: (){
+        onPressed: () {
           _goToFormAndWaitForSaveResult(context);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-
   }
 
 
