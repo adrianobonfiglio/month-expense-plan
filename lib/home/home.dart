@@ -111,109 +111,108 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: Column(
         children: <Widget>[
-          Container(
-              color: BARS_COLOR,
-              height: 115,
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Text("Estimados",
+          Expanded(
+            flex: 1,
+            child:Container(
+                color: BARS_COLOR,
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Text("Estimados",
+                                style: TextStyle(
+                                    color: Colors.amber,
+                                    fontFamily: FONT_FAMILY,
+                                    fontWeight: FontWeight.bold)),
+                            Text("R\$ 3.000,00",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontFamily: FONT_FAMILY,
+                                    fontWeight: FontWeight.bold))
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(right: 30, left: 30),
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              "Gasto",
                               style: TextStyle(
                                   color: Colors.amber,
                                   fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold)),
-                          Text("R\$ 3.000,00",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: 30, left: 30),
-                      ),
-                      Column(
-                        children: <Widget>[
-                          Text(
-                            "Gasto",
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontFamily: FONT_FAMILY,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text("R\$ 1.000,00",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
-                        ],
-                      )
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBar(
-                      controller: controller,
-                      onTap: (index) {
-                        print(index);
-                      },
-                      indicator: UnderlineTabIndicator(
-                          insets: EdgeInsets.all(5),
-                          borderSide:
-                          BorderSide(width: 5, color: Colors.amber)),
-                      tabs: [
-                        Text("Abertas",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontFamily: FONT_FAMILY,
-                                fontWeight: FontWeight.bold)),
-                        Text("Pagas",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontFamily: FONT_FAMILY,
-                                fontWeight: FontWeight.bold)),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Text("R\$ 1.000,00",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontFamily: FONT_FAMILY,
+                                    fontWeight: FontWeight.bold))
+                          ],
+                        )
                       ],
                     ),
-                  )
-                ],
-              )),
-          Container(
-            height: ((MediaQuery
-                .of(context)
-                .size
-                .height - AppBar().preferredSize.height) - 115 - 80),
-            child:
-            TabBarView(
-                controller: controller,
-                children: <Widget>[
-                  ListView.builder(
-                      itemCount: bills.length, itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        _gotToFormAndWaitForUpdate(context, index, Status.OPEN);
-                      },
-                      child: BillCard(bills[index]),
-                    );
-                  }),
-                  ListView.builder(itemCount: payedBills.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            _gotToFormAndWaitForUpdate(
-                                context, index, Status.PAYED);
-                          },
-                          child: BillCard(payedBills[index]),
-                        );
-                      })
-                ]),
+                    Expanded(
+                      child: TabBar(
+                        controller: controller,
+                        onTap: (index) {
+                          print(index);
+                        },
+                        indicator: UnderlineTabIndicator(
+                            insets: EdgeInsets.all(5),
+                            borderSide:
+                            BorderSide(width: 5, color: Colors.amber)),
+                        tabs: [
+                          Text("Abertas",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontFamily: FONT_FAMILY,
+                                  fontWeight: FontWeight.bold)),
+                          Text("Pagas",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontFamily: FONT_FAMILY,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    )
+                  ],
+                )),
+          ),
+          Expanded(
+            flex: 3,
+              child: TabBarView(controller: controller, children: <Widget>[
+                ListView.builder(
+                    itemCount: bills.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          _gotToFormAndWaitForUpdate(
+                              context, index, Status.OPEN);
+                        },
+                        child: BillCard(bills[index]),
+                      );
+                    }),
+                ListView.builder(
+                    itemCount: payedBills.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          _gotToFormAndWaitForUpdate(
+                              context, index, Status.PAYED);
+                        },
+                        child: BillCard(payedBills[index]),
+                      );
+                    })
+              ]),
           ),
           BottomNavigationBar(
               backgroundColor: BARS_COLOR,
@@ -230,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     title: Title(color: BARS_COLOR,
                         child: Text("Próximo mês",
                           style: TextStyle(color: Colors.white),)))
-              ])
+              ]),
         ],
       ),
       floatingActionButton: FloatingActionButton(
