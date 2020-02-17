@@ -72,8 +72,9 @@ class Bill {
 
   static Future<Bill> save(Bill bill) async {
     final Database db = await DatabaseConnection().getDatabaseConnection();
+
     if (bill.id != null) {
-      await db.update('Bill', bill.toMap());
+      await db.update('Bill', bill.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     } else {
       await db.insert('Bill', bill.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
@@ -81,5 +82,7 @@ class Bill {
     return null;
   }
 
-  static void delete(int id) {}
+  static void delete(int id) {
+
+  }
 }
