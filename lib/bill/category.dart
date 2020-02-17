@@ -18,4 +18,8 @@ class Category {
       Category("Entretenimento", Colors.blueGrey),
     ];
   }
+
+  static Category getCategory(String categoryName) {
+    return allCategories().firstWhere((cat) => cat.name == categoryName);
+  }
 }

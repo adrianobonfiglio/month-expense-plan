@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:month_expense_plan/bill/category.dart';
 import 'package:month_expense_plan/bill/status.dart';
+import 'package:month_expense_plan/database/database_connection.dart';
+import 'package:sqflite/sqflite.dart';
 
 class Bill {
+  int id;
   String name;
   double amount;
   Category category;
@@ -12,28 +13,73 @@ class Bill {
   bool recurrent;
   double plannedAmount;
 
-  Bill(this.name, this.amount, this.category, this.dueDate, this.status, this.recurrent, this.plannedAmount);
+  Bill(this.id, this.name, this.amount, this.category, this.dueDate,
+      this.status, this.recurrent, this.plannedAmount);
 
-  static List<Bill> findAll() {
-    return [
-      Bill("Compras do Mês", 500.0,
-          Category("Marcado", Color(0xffFF1744)), "15", Status.OPEN, false, 500.0),
-      Bill("Água", 90.0, Category("Casa", Color(0xff00C853)), "25", Status.OPEN, false, 90.0),
-      Bill("Luz", 90.0, Category("Casa", Color(0xff00C853)), "10", Status.OPEN, false, 90.0),
-      Bill("Celular", 130.0, Category("Pessoal", Color(0xff0091EA)),
-          "15", Status.OPEN, false, 130.0),
-      Bill("Carro", 380.0, Category("Carro", Color(0xff6200ea)),
-          "22", Status.OPEN, false, 380.0),
-      Bill("Internet", 90.0, Category("Pessoal", Color(0xff0091EA)),
-          "15", Status.OPEN, false, 90.0)
-    ];
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'amount': amount,
+      'planned_amount': plannedAmount,
+      'category': category.name,
+      'status': status.toString().split('.').last,
+      'dueDate': dueDate,
+      'recurrent': recurrent,
+    };
   }
 
-  static List<Bill> findAllPayed() {
-    return [
-      Bill("Compras do Mês", 500.0,
-          Category("Marcado", Color(0xffFF1744)), "15", Status.PAYED, false, null),
-      Bill("Água", 90.0, Category("Casa", Color(0xff00C853)), "25", Status.PAYED, false, null)
-    ];
+  static Future<List<Bill>> findAllOpen() async {
+    final Database db = await DatabaseConnection().getDatabaseConnection();
+
+    final List<Map<String, dynamic>> maps = await db.query('Bill', where: "status == ?", whereArgs: [Status.OPEN.toString().split('.').last]);
+
+    return List.generate(maps.length, (i) {
+      return Bill(
+          maps[i]['id'],
+          maps[i]['name'],
+          maps[i]['amount'],
+          Category.getCategory(maps[i]['category']),
+          maps[i]['dueDate'],
+          Status
+              .OPEN, //Status.values.singleWhere((s) => s == maps[i]['status']),
+          maps[i]['recurrent'] == 0 ? false : true,
+          maps[i]['planned_amount']);
+    });
   }
+
+    static Future<List<Bill>> findAllPayed() async {
+    final Database db = await DatabaseConnection().getDatabaseConnection();
+
+    final List<Map<String, dynamic>> maps = await db.query('Bill', where: "status == ?", whereArgs: [Status.PAYED.toString().split('.').last]);
+
+    return List.generate(maps.length, (i) {
+      return Bill(
+          maps[i]['id'],
+          maps[i]['name'],
+          maps[i]['amount'],
+          Category.getCategory(maps[i]['category']),
+          maps[i]['dueDate'],
+          Status
+              .PAYED, //Status.values.singleWhere((s) => s == maps[i]['status']),
+          maps[i]['recurrent'] == 0 ? false : true,
+          maps[i]['planned_amount']);
+    });
+  }
+
+  static Bill findOne(int id) {
+    return null;
+  }
+
+  static Future<Bill> save(Bill bill) async {
+    final Database db = await DatabaseConnection().getDatabaseConnection();
+    if (bill.id != null) {
+      await db.update('Bill', bill.toMap());
+    } else {
+      await db.insert('Bill', bill.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+    return null;
+  }
+
+  static void delete(int id) {}
 }

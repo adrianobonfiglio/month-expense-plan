@@ -22,7 +22,6 @@ class BillFormState extends State<BillForm> {
   final _formKey = GlobalKey<FormState>();
 
   String screenTitle = "Add new";
-  int _amountValue = 0;
   Category categoryDropDownValue;
   bool isPayed = false;
   bool isRecurrent = false;
@@ -33,6 +32,7 @@ class BillFormState extends State<BillForm> {
   TextEditingController amountFieldController = TextEditingController();
   TextEditingController dueDateFieldController = TextEditingController();
   TextEditingController plannedAmount = TextEditingController();
+  int billId = null;
 
   @override
   void initState() {
@@ -58,9 +58,11 @@ class BillFormState extends State<BillForm> {
     setState(() {
       Bill bill = ModalRoute.of(context).settings.arguments;
       if(bill != null) {
+        billId = bill.id;
         screenTitle = "Edit Bill";
         nameFieldController.text = bill.name;
         amountFieldController.text = bill.amount.toString();
+        plannedAmount.text = bill.plannedAmount.toString();
         dueDateFieldController.text = bill.dueDate;
         isPayed = bill.status == Status.PAYED ? true : false;
         isRecurrent = bill.recurrent;
@@ -88,15 +90,16 @@ class BillFormState extends State<BillForm> {
             IconButton(
                 icon: Icon(Icons.save, size: 30, color: Colors.white),
                 onPressed: () {
-                  FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
+/*                   FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
                       amount: double.parse(amountFieldController.text),
                       settings: MoneyFormatterSettings(symbol: "R\$", decimalSeparator: ",", fractionDigits: 2)
-                  );
+                  ); */
 
 
-                  Bill bill = Bill(nameFieldController.text, double.tryParse(amountFieldController.text),
+                  Bill bill = Bill(billId, nameFieldController.text, double.tryParse(amountFieldController.text),
                       categoryDropDownValue, dueDateFieldController.text, isPayed ? Status.PAYED : Status.OPEN,
                       isRecurrent, double.tryParse(plannedAmount.text));
+                  Bill.save(bill);
                   Navigator.pop(context, bill);
                 }
             )
@@ -132,7 +135,7 @@ class BillFormState extends State<BillForm> {
                 ),
                 TextField(
                     enabled: isRecurrent,
-                    controller: amountFieldController,
+                    controller: plannedAmount,
                     decoration: InputDecoration(labelText: "Valor Planejado", prefix: Text("R\$ "))
                 ),
                 TextField(
