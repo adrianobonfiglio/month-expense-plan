@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:month_expense_plan/bill/bill.dart';
-import 'package:month_expense_plan/bill/billform.dart';
-import 'package:month_expense_plan/bill/category.dart';
-import 'package:month_expense_plan/main.dart';
 
 const FONT_FAMILY = "Helvetica Neue";
 
@@ -80,7 +77,7 @@ class BillCard extends StatelessWidget {
                     alignment: Alignment.topRight,
                     padding: EdgeInsets.only(top: 10, right: 10),
                     child: Text(
-                      "R\$ ${bill.amount}",
+                      "R\$ ${bill.plannedAmount}",
                       style: TextStyle(
                           fontFamily: FONT_FAMILY,
                           fontWeight: FontWeight.bold,
