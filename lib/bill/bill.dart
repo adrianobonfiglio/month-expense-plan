@@ -31,7 +31,9 @@ class Bill {
   static Future<List<Bill>> findAllOpen() async {
     final Database db = await DatabaseConnection().getDatabaseConnection();
 
-    final List<Map<String, dynamic>> maps = await db.query('Bill', where: "status == ?", whereArgs: [Status.OPEN.toString().split('.').last]);
+    final List<Map<String, dynamic>> maps = await db.query('Bill',
+        where: "status == ?",
+        whereArgs: [Status.OPEN.toString().split('.').last]);
 
     return List.generate(maps.length, (i) {
       return Bill(
@@ -47,10 +49,12 @@ class Bill {
     });
   }
 
-    static Future<List<Bill>> findAllPayed() async {
+  static Future<List<Bill>> findAllPayed() async {
     final Database db = await DatabaseConnection().getDatabaseConnection();
 
-    final List<Map<String, dynamic>> maps = await db.query('Bill', where: "status == ?", whereArgs: [Status.PAYED.toString().split('.').last]);
+    final List<Map<String, dynamic>> maps = await db.query('Bill',
+        where: "status == ?",
+        whereArgs: [Status.PAYED.toString().split('.').last]);
 
     return List.generate(maps.length, (i) {
       return Bill(
@@ -74,7 +78,8 @@ class Bill {
     final Database db = await DatabaseConnection().getDatabaseConnection();
 
     if (bill.id != null) {
-      await db.update('Bill', bill.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.update('Bill', bill.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
     } else {
       await db.insert('Bill', bill.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
@@ -82,7 +87,24 @@ class Bill {
     return null;
   }
 
-  static void delete(int id) {
+  static void delete(int id) async {
+    final Database db = await DatabaseConnection().getDatabaseConnection();
+    await db.delete('Bill', where: "id == ?", whereArgs: [id]);
+  }
 
+  static Future<double> getTotalPlannedAmount() async {
+    double totalPlannedAmount = 0;
+    List<Bill> bills = await findAllOpen();
+    bills.forEach((b) => totalPlannedAmount += b.plannedAmount);
+
+    return totalPlannedAmount;
+  }
+
+  static Future<double> getTotalSpentAmount() async {
+    double totalSpentAmount = 0;
+    List<Bill> bills = await findAllPayed();
+    bills.forEach((b) => totalSpentAmount += b.amount);
+
+    return totalSpentAmount;
   }
 }

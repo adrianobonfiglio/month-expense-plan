@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:month_expense_plan/bill/bill.dart';
 import 'package:month_expense_plan/bill/billform.dart';
 import 'package:month_expense_plan/bill/card.dart';
@@ -37,6 +38,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   TabController controller;
   List<Bill> bills = new List();
   List<Bill> payedBills = new List();
+  String totalPlannedAmount = "";
+  String totalSpentAmount = "";
 
   @override
   void initState() {
@@ -59,20 +62,45 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         MaterialPageRoute(
             builder: (context) => BillForm(),
             settings: RouteSettings(arguments: bill)));
-    if(bill.status == Status.PAYED) {
+    if (bill.status == Status.PAYED) {
       controller.animateTo(1, duration: Duration(seconds: 2));
-    }else {
+    } else {
       controller.animateTo(0, duration: Duration(seconds: 2));
     }
   }
 
   _goToFormAndWaitForSaveResult(BuildContext context) async {
-     await Navigator.push(
+    await Navigator.push(
         context, MaterialPageRoute(builder: (context) => BillForm()));
+  }
+
+  _setPlannedAmmoutValue() async {
+    double value = await Bill.getTotalPlannedAmount();
+    setState(() {
+      totalPlannedAmount = _formatMoneyValue(value);
+    });
+  }
+
+  _setSpentAmmoutValue() async {
+    double value = await Bill.getTotalSpentAmount();
+    setState(() {
+      totalSpentAmount = _formatMoneyValue(value);
+    });
+  }
+
+  String _formatMoneyValue(double value) {
+    FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
+        amount: value,
+        settings: MoneyFormatterSettings(
+            symbol: "R\$", decimalSeparator: ",", fractionDigits: 2));
+    return flutterMoneyFormatter.output.symbolOnLeft;
   }
 
   @override
   Widget build(BuildContext context) {
+    _setPlannedAmmoutValue();
+    _setSpentAmmoutValue();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Novembro", style: TextStyle(color: Colors.white)),
@@ -98,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                   color: Colors.amber,
                                   fontFamily: FONT_FAMILY,
                                   fontWeight: FontWeight.bold)),
-                          Text("R\$ 3.000,00",
+                          Text(totalPlannedAmount.toString(),
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 26,
@@ -118,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 fontFamily: FONT_FAMILY,
                                 fontWeight: FontWeight.bold),
                           ),
-                          Text("R\$ 1.000,00",
+                          Text(totalSpentAmount,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 26,
@@ -183,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 },
                 future: Bill.findAllOpen(),
               ),
-          FutureBuilder(
+              FutureBuilder(
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
