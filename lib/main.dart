@@ -38,15 +38,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   TabController controller;
   List<Bill> bills = new List();
   List<Bill> payedBills = new List();
-  String totalPlannedAmount = "";
-  String totalSpentAmount = "";
 
   @override
   void initState() {
     super.initState();
     controller = new TabController(length: 2, vsync: this);
-
-    print("Init state");
   }
 
   @override
@@ -74,20 +70,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         context, MaterialPageRoute(builder: (context) => BillForm()));
   }
 
-  _setPlannedAmmoutValue() async {
-    double value = await Bill.getTotalPlannedAmount();
-    setState(() {
-      totalPlannedAmount = _formatMoneyValue(value);
-    });
-  }
-
-  _setSpentAmmoutValue() async {
-    double value = await Bill.getTotalSpentAmount();
-    setState(() {
-      totalSpentAmount = _formatMoneyValue(value);
-    });
-  }
-
   String _formatMoneyValue(double value) {
     FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
         amount: value,
@@ -98,12 +80,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    _setPlannedAmmoutValue();
-    _setSpentAmmoutValue();
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Novembro", style: TextStyle(color: Colors.white)),
+        title: Text("Gastos do mês", style: TextStyle(color: Colors.white)),
         elevation: 0.0,
         centerTitle: true,
         backgroundColor: BARS_COLOR,
@@ -121,17 +100,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          Text("Estimados",
+                          Text("Estimado",
                               style: TextStyle(
                                   color: Colors.amber,
                                   fontFamily: FONT_FAMILY,
                                   fontWeight: FontWeight.bold)),
-                          Text(totalPlannedAmount.toString(),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
+                          FutureBuilder(
+                            builder: (context, snapshot) {
+                              return Text(_formatMoneyValue(snapshot.data),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontFamily: FONT_FAMILY,
+                                      fontWeight: FontWeight.bold));
+                            },
+                            future: Bill.getTotalPlannedAmount(),
+                            initialData: double.parse("0"),
+                          )
                         ],
                       ),
                       Padding(
@@ -146,12 +131,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 fontFamily: FONT_FAMILY,
                                 fontWeight: FontWeight.bold),
                           ),
-                          Text(totalSpentAmount,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
+                          FutureBuilder(
+                            builder: (context, snapshot) {
+                              return Text(_formatMoneyValue(snapshot.data),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontFamily: FONT_FAMILY,
+                                      fontWeight: FontWeight.bold));
+                            },
+                            future: Bill.getTotalSpentAmount(),
+                            initialData: double.parse("0"),
+                          )
                         ],
                       )
                     ],

@@ -78,7 +78,7 @@ class Bill {
     final Database db = await DatabaseConnection().getDatabaseConnection();
 
     if (bill.id != null) {
-      await db.update('Bill', bill.toMap(),
+      await db.update('Bill', bill.toMap(), where: "id = ?", whereArgs: [bill.id],
           conflictAlgorithm: ConflictAlgorithm.replace);
     } else {
       await db.insert('Bill', bill.toMap(),

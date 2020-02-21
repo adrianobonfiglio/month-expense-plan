@@ -76,8 +76,8 @@ class BillFormState extends State<BillForm> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              FocusScope.of(context).requestFocus(FocusNode());
-              Navigator.pop(context, false);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MyHomePage()));
             },
           ),
           actions: <Widget>[
@@ -94,14 +94,21 @@ class BillFormState extends State<BillForm> {
                             return AlertDialog(
                               title: Text("Are you sure?"),
                               actions: <Widget>[
-                                FlatButton(child: Text("Yes"), onPressed: () {
-                                  Bill.delete(billId);
-                                  Navigator.push(
-                                    context, MaterialPageRoute(builder: (context) => MyHomePage()));
-                                }),
-                                FlatButton(child: Text("No"), onPressed: () {
-                                  Navigator.of(context).pop();
-                                })
+                                FlatButton(
+                                    child: Text("Yes"),
+                                    onPressed: () {
+                                      Bill.delete(billId);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MyHomePage()));
+                                    }),
+                                FlatButton(
+                                    child: Text("No"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    })
                               ],
                             );
                           });
