@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:month_expense_plan/bill/bill.dart';
 import 'package:month_expense_plan/bill/billform.dart';
 import 'package:month_expense_plan/bill/card.dart';
@@ -42,8 +43,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     controller = new TabController(length: 2, vsync: this);
-
-    print("Init state");
   }
 
   @override
@@ -59,23 +58,31 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         MaterialPageRoute(
             builder: (context) => BillForm(),
             settings: RouteSettings(arguments: bill)));
-    if(bill.status == Status.PAYED) {
+    if (bill.status == Status.PAYED) {
       controller.animateTo(1, duration: Duration(seconds: 2));
-    }else {
+    } else {
       controller.animateTo(0, duration: Duration(seconds: 2));
     }
   }
 
   _goToFormAndWaitForSaveResult(BuildContext context) async {
-     await Navigator.push(
+    await Navigator.push(
         context, MaterialPageRoute(builder: (context) => BillForm()));
+  }
+
+  String _formatMoneyValue(double value) {
+    FlutterMoneyFormatter flutterMoneyFormatter = FlutterMoneyFormatter(
+        amount: value,
+        settings: MoneyFormatterSettings(
+            symbol: "R\$", decimalSeparator: ",", fractionDigits: 2));
+    return flutterMoneyFormatter.output.symbolOnLeft;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Novembro", style: TextStyle(color: Colors.white)),
+        title: Text("Gastos do mês", style: TextStyle(color: Colors.white)),
         elevation: 0.0,
         centerTitle: true,
         backgroundColor: BARS_COLOR,
@@ -93,17 +100,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          Text("Estimados",
+                          Text("Estimado",
                               style: TextStyle(
                                   color: Colors.amber,
                                   fontFamily: FONT_FAMILY,
                                   fontWeight: FontWeight.bold)),
-                          Text("R\$ 3.000,00",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
+                          FutureBuilder(
+                            builder: (context, snapshot) {
+                              return Text(_formatMoneyValue(snapshot.data),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontFamily: FONT_FAMILY,
+                                      fontWeight: FontWeight.bold));
+                            },
+                            future: Bill.getTotalPlannedAmount(),
+                            initialData: double.parse("0"),
+                          )
                         ],
                       ),
                       Padding(
@@ -118,12 +131,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 fontFamily: FONT_FAMILY,
                                 fontWeight: FontWeight.bold),
                           ),
-                          Text("R\$ 1.000,00",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                  fontFamily: FONT_FAMILY,
-                                  fontWeight: FontWeight.bold))
+                          FutureBuilder(
+                            builder: (context, snapshot) {
+                              return Text(_formatMoneyValue(snapshot.data),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontFamily: FONT_FAMILY,
+                                      fontWeight: FontWeight.bold));
+                            },
+                            future: Bill.getTotalSpentAmount(),
+                            initialData: double.parse("0"),
+                          )
                         ],
                       )
                     ],
@@ -183,7 +202,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 },
                 future: Bill.findAllOpen(),
               ),
-          FutureBuilder(
+              FutureBuilder(
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
